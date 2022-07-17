@@ -1,0 +1,413 @@
+@import "material-theme-color.css";
+@import url("https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap");
+
+html {
+  --mdc-typography-subtitle1-font-size: 1.5rem;
+  --font-family: "Roboto Mono", monospace;
+  font-family: var(--font-family);
+}
+
+body {
+  display: grid;
+  place-items: center;
+  background-color: var(--md-sys-color-background);
+  margin: 0.3rem auto;
+  gap: 2rem;
+}
+
+input[type=text],
+textarea,
+.mdc-text-field--outlined .mdc-text-field__resizer .mdc-text-field__input,
+.mdc-text-field .mdc-text-field__input,
+.mdc-text-field:not(.mdc-text-field--disabled) .mdc-text-field__input,
+.mdc-text-field--textarea .mdc-text-field__input {
+  color: #EEE;
+  font-family: var(--font-family);
+  caret-color: aliceblue;
+  font-size: 1.25rem;
+  line-height: 1.5rem;
+}
+
+textarea.nowrap,
+.mdc-text-field__input.nowrap {
+  white-space: pre;
+  overflow-wrap: normal;
+  overflow-x: scroll;
+}
+
+textarea[data-css="don't squoosh spaces; break words"] {
+  white-space: break-spaces;
+  word-break: break-all;
+}
+
+.mdc-text-field--outlined .mdc-text-field__resizer .mdc-text-field-character-counter {
+  color: var(--md-sys-color-primary);
+}
+
+#the4 {
+  position: relative;
+}
+
+#the3>label {
+  border: 1px #FFD54F dashed;
+  margin-top: -1px;
+  margin-left: -1px;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+#the3 #unchanged {
+  color: darkgray;
+}
+
+#the3 #replaced {
+  color: crimson;
+}
+
+#the3 #become {
+  color: lightskyblue;
+}
+
+
+.mdc-text-field--filled:not(.mdc-text-field--disabled) {
+  background-color: var(--md-sys-color-on-secondary);
+}
+
+.mdc-button--raised:not(:disabled) {
+  color: #eee;
+  font-weight: bold;
+}
+
+[hidden] {
+  display: none;
+}
+
+#textarea[hidden] {
+  visibility: hidden;
+}
+
+.mdc-snackbar__label,
+.mdc-snackbar__label *,
+.mdc-snackbar__actions * {
+  color: #eee;
+  font-size: 1.2rem;
+  letter-spacing: -0.03ch;
+  font-family: "Roboto Mono";
+  line-height: 125%;
+}
+
+.ia {
+  vertical-align: text-top;
+}
+
+flex {
+  --init-w: 618px;
+  width: var(--init-w);
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: center;
+  --min-h: 7.55rem;
+  min-height: var(--min-h);
+  max-height: calc(var(--min-h) + var(--ex-h, 0rem));
+  resize: both;
+  overflow: scroll;
+  background-color: rgba(240, 248, 255, 0.07);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  box-sizing: border-box;
+  scroll-snap-type: y;
+  scroll-padding: 1rem;
+  z-index: 1;
+  transition: max-height 0.25s, min-height 0.25s, height 0.25s;
+}
+
+flex>* {
+  width: 100%;
+}
+
+flex>*,
+flex>*>* {
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+
+flex-sub {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+flex-sub:not(:first-child) {
+  padding-top: 1.1rem;
+  border-top: 1px solid;
+  color: var(--md-sys-color-primary);
+}
+
+flex-sub:last-child {
+  scroll-snap-align: end;
+}
+
+#mjx {
+  color: snow;
+  font-size: 1.19rem;
+  overflow: auto;
+  border: 1pt solid rgba(240, 248, 255, 0.4);
+  border-radius: 3pt;
+  padding: 1rem;
+  box-sizing: border-box;
+  margin: 0;
+}
+
+#ruleList {
+  display: flex;
+  flex-direction: column;
+  padding: unset;
+}
+
+#ruleList,
+.mdc-text-field.mdc-text-field--filled {
+  width: 100%;
+}
+
+#ruleList .mdc-text-field__input {
+  font-size: 1.2rem;
+}
+
+.flex-inline {
+  display: inline-flex;
+}
+
+.narrow>.flex-inline {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+}
+
+.narrow>.flex-inline>mdc-checkbox {
+  grid-area: 2 / 12 / 3 / 13;
+  justify-self: end;
+}
+
+.narrow>.flex-inline>mdc-checkbox>.mdc-checkbox>.mdc-checkbox__background {
+  left: unset;
+}
+
+.narrow>.flex-inline>.mdc-text-field:nth-of-type(1) {
+  grid-area: 1 / 1 / 2 / 13;
+}
+
+.narrow>.flex-inline>.mdc-text-field:nth-of-type(2) {
+  grid-area: 2 / 1 / 3 / 12;
+  padding-right: unset;
+}
+
+
+[role=v-separator] {
+  box-shadow: 0 0 8px -1px rgba(255, 255, 255, 0.8), 0 0 9px 0 rgba(255, 255, 255, 0.86), 0 0 10px 0 rgba(255, 255, 255, 0.88);
+  border: 1px solid var(--md-sys-color-primary);
+  margin: 0 0.6ch;
+  background-clip: content-box;
+}
+
+.narrow>.flex-inline>[role=v-separator] {
+  display: none;
+}
+
+.mdc-notched-outline__notch * {
+  line-height: 2rem;
+}
+
+.mdc-text-field--outlined:not(.mdc-text-field--disabled) .mdc-notched-outline__leading,
+.mdc-text-field--outlined:not(.mdc-text-field--disabled) .mdc-notched-outline__notch,
+.mdc-text-field--outlined:not(.mdc-text-field--disabled) .mdc-notched-outline__trailing {
+  border-color: rgba(225, 224, 224, 0.38);
+}
+
+.mdc-text-field--outlined:not(.mdc-text-field--disabled):not(.mdc-text-field--focused):hover .mdc-notched-outline .mdc-notched-outline__leading,
+.mdc-text-field--outlined:not(.mdc-text-field--disabled):not(.mdc-text-field--focused):hover .mdc-notched-outline .mdc-notched-outline__notch,
+.mdc-text-field--outlined:not(.mdc-text-field--disabled):not(.mdc-text-field--focused):hover .mdc-notched-outline .mdc-notched-outline__trailing {
+  border-color: rgba(184, 180, 180, 0.87);
+}
+
+.mdc-text-field:not(.mdc-text-field--disabled) .mdc-floating-label {
+  font-family: var(--font-family);
+  color: #D0BCFFBB;
+  line-height: initial;
+}
+
+.mdc-text-field--textarea.mdc-text-field--outlined.mdc-notched-outline--upgraded .mdc-floating-label--float-above,
+.mdc-text-field--textarea.mdc-text-field--outlined .mdc-notched-outline--upgraded .mdc-floating-label--float-above {
+  font-size: 1.5rem;
+}
+
+.mdc-checkbox .mdc-checkbox__native-control:enabled:not(:checked):not(:indeterminate):not([data-indeterminate="true"])~.mdc-checkbox__background {
+  border-color: var(--md-sys-color-primary);
+}
+
+.mdc-floating-label.mdc-floating-label--float-above {
+  font-size: 1rem;
+}
+
+.mdc-floating-label.mdc-floating-label--float-above .material-icons {
+  font-size: 1.25rem;
+}
+
+
+.mdc-button {
+  font-size: 1rem;
+  text-transform: capitalize;
+}
+
+
+.mdc-snackbar__surface {
+  justify-content: space-around;
+}
+
+.mdc-snackbar__surface.two {
+  justify-content: space-between;
+}
+
+.mdc-snackbar__surface>* {
+  flex: 0 1 max-content;
+}
+
+
+
+mdc-checkbox {
+  align-self: center;
+}
+
+.mdc-checkbox {
+  --side: 2rem;
+  width: var(--side);
+  height: var(--side);
+  cursor: unset;
+  flex-basis: unset;
+  --side-margin: calc(-0.3 * var(--side));
+}
+
+.mdc-checkbox.frozen,
+.left>.mdc-checkbox.frozen {
+  padding: calc(-0.15 * calc(-0.3 * var(--side)));
+  margin: unset;
+  background-image: linear-gradient(to right top, #051937, #004d7a, #008793, #00bf72, #a8eb12);
+  border-radius: 50%;
+}
+
+.mdc-checkbox.frozen>.mdc-checkbox__background,
+.mdc-checkbox.frozen>.mdc-checkbox__native-control:enabled:checked~.mdc-checkbox__background,
+.mdc-checkbox.frozen>.mdc-checkbox__native-control:enabled:indeterminate~.mdc-checkbox__background,
+.mdc-checkbox.frozen>.mdc-checkbox__native-control[data-indeterminate="true"]:enabled~.mdc-checkbox__background {
+  border-color: transparent;
+  background-color: unset;
+}
+
+.left>.mdc-checkbox {
+  margin: 0 var(--side-margin);
+}
+
+.mdc-checkbox .mdc-checkbox__native-control {
+  top: unset;
+  left: unset;
+  right: unset;
+  width: var(--side);
+  height: var(--side);
+  cursor: pointer;
+}
+
+.mdc-checkbox .mdc-checkbox__background {
+  top: unset;
+  left: unset;
+  width: var(--side);
+  height: var(--side);
+}
+
+.mdc-snackbar__action:not(:disabled)>.mdc-button__label {
+  color: #FFD54F;
+}
+
+.mdc-snackbar__action .mdc-button__ripple::before,
+.mdc-snackbar__action .mdc-button__ripple::after {
+  background-color: #FFD54F;
+}
+
+.mdc-menu-surface {
+  background-color: var(--md-sys-color-inverse-on-surface);
+  box-shadow: 0px 5px 5px -3px rgba(111, 111, 111, 0.2), 0px 8px 10px 1px rgba(111, 111, 111, 0.14), 0px 3px 14px 2px rgba(111, 111, 111, 0.12);
+}
+
+.mdc-list-item {
+  --gap: 0.5rem;
+  white-space: pre;
+  padding-top: var(--gap);
+  padding-bottom: var(--gap);
+}
+
+.mdc-list-item:not(.mdc-list-item--disabled) * {
+  color: var(--md-sys-color-inverse-surface);
+  font-size: 1.3rem;
+}
+
+.mdc-list-item:not(.mdc-list-item--disabled) .mdc-list-item__ripple::before,
+.mdc-list-item:not(.mdc-list-item--disabled) .mdc-list-item__ripple::after {
+  background-color: var(--md-sys-color-on-surface-variant);
+}
+
+.mdc-list-item:hover:not(.mdc-list-item--disabled) .mdc-list-item__ripple::before,
+.mdc-list-item.mdc-ripple-surface--hover:not(.mdc-list-item--disabled) .mdc-list-item__ripple::before {
+  opacity: 0.15;
+}
+
+
+.mdc-tooltip__surface {
+  font-size: large;
+  max-width: unset;
+  line-height: 1.5rem;
+}
+
+
+flex-sub:last-child>button {
+  --border: 2px currentColor solid;
+  border: var(--border);
+  --on-color: goldenrod;
+}
+
+button[data-tooltip-id] {
+  font-size: 2rem;
+  padding: unset;
+  border-radius: 20%;
+  color: var(--on-color);
+}
+
+button[data-tooltip-id][data-state=off] {
+  color: unset;
+  border: unset;
+}
+
+button[data-tooltip-id]+[role=tooltip]>[data-state]::after {
+  color: rgba(255, 250, 250, 0.9);
+  content: attr(data-text)"\a(current: " attr(data-state)")";
+  white-space: pre-line;
+}
+
+#btn_diff[data-viewing=true] {
+  --color: rgba(255, 0, 255, 0.77);
+  --shadow: 0 0 1rem var(--color);
+  background-color: var(--color);
+  box-shadow: inset var(--shadow), var(--shadow);
+  border: 1px solid var(--color);
+}
+
+#btn_menu {
+  border-radius: 50%;
+  font-size: 2rem;
+  line-height: 0;
+  text-indent: -0.369rem;
+  transition: margin 0.25s;
+}
+
+#btn_menu[data-state=on] {
+  color: var(--on-color);
+}
