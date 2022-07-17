@@ -102,7 +102,7 @@ btn_diff.addEventListener("click", btn_diff._ctrl = ({ detail: { inst } = {} }) 
 btn_diff._alloc = targetAreaId => {
   if (!btn_diff._diffTables_src) return ""
   if (!btn_diff._diffTables) btn_diff._diffTables_gen()
-  return btn_diff._diffTables.map(([str, mark]) => mark === targetAreaId ? str : str.replace(/\S/g, m => " ".repeat(/[^\x00-\xff]/.test(m) ? 2 : 1))).join("")
+  return btn_diff._diffTables.map(([str, mark]) => mark === targetAreaId ? str : str.replace(/\S/g, m => m === "␣" ? " " : " ".repeat(/[^\x00-\xff]/.test(m) ? 2 : 1))).join("")
 }
 btn_diff._diffTables_gen = () => {
   if (!btn_diff._diffTables_src) return
@@ -116,11 +116,12 @@ btn_diff._diffTables_gen = () => {
     if (str1.length > str2.length) return mergeExactSubsetStrings([str2, str1, "(reversed)"], ...Array.prototype.slice.call(arguments, 1))
     if (!str2.includes(str1)) return
     const jud = { "isAdded": "become", "isDeleted": "replaced" }[isReversed ? "isDeleted" : "isAdded"]
-    const { index } = str2.indexOf(str1)
+    const index = str2.indexOf(str1)
     arr[i].splice(0, Infinity, str1, "", "unchanged")
-    arr[i + 1].splice(0, Infinity, str2.substring(index + str1.length), "", jud, jud)
-    index > 0 && arr.splice(i, 0, [str2.substring(0, index), "", jud])
+    arr[i + 1].splice(0, Infinity, reprSp(str2.substring(index + str1.length)), "", jud, jud)
+    index > 0 && arr.splice(i, 0, [reprSp(str2.substring(0, index)), "", jud])
   }
+  function reprSp(str) { return str.replaceAll(" ", "␣") }
   btn_diff._diffTables.forEach(_ => { _.splice(1, 1); _.splice(2, 1) })
 }
 btn_diff._diffTables_reset = srcObj => {
@@ -139,7 +140,8 @@ btn_rplc.addEventListener("click", () => {
       $find = $find.replace(/^\s*\/\*.*?\*\//, "")
       if (!$find) return
       $find = isStrReg($find) ? eval(/\/\w*g\w*$/.test($find) ? $find : `${$find}g`) : RegExp(escChars(btn_bslEsc._on ? $find : dblBsl($find)), "g")
-      if (btn_bslEsc._on) $rplc = eval(`"${$rplc.replaceAll(`"`, `\\"`)}"`)
+      if ($rplc.includes("=>")) $rplc = eval($rplc)
+      else if (btn_bslEsc._on) $rplc = eval(`"${$rplc.replaceAll(`"`, `\\"`)}"`)
       // console.log($find, $rplc)
       rplcArr[i] = []
       while ([text, index_a] = textArr.shift() || [], text) {
@@ -154,7 +156,8 @@ btn_rplc.addEventListener("click", () => {
         }
         if (index_n < text.length) rplcArr[i].push([text.substring(index_n), index_a + index_n, "unchanged"])
       }
-      rplcArr[i].forEach(([, , mark], i, arr) => mark === "unchanged" && textArr.push(arr.splice(i, 1).shift()))
+      rplcArr[i].forEach(([, , mark], i, arr) => mark === "unchanged" && textArr.push(arr[i]) && delete arr[i])
+      rplcArr[i].splice(0, Infinity, ...rplcArr[i].filter(() => true))
     })
   } catch (err) {
     return tell(err, Infinity)
