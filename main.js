@@ -370,7 +370,7 @@ exportRules.reap = (retType = "partialArray") => {
 
 
 [btn_rplc, btn_undo, btn_cut, btn_menu].forEach(_ => _.addEventListener("click", btn_diff._close));
-[btn_rplc, btn_undo, btn_rec, exportRules].forEach(_ => _.addEventListener("click", () => textarea.value && set__mdc_floating_label_to_above(textarea)));
+[btns_edit, exportRules].forEach(_ => _.addEventListener("click", () => /* Don't: textarea.value && */ set__mdc_floating_label_to_above(textarea)));
 [btn_invSel, btn_addRule, btn_delRules, btn_selBtwn].forEach(_ => _.addEventListener("click", btn_toggleAll._detectBoxesStat))
 
 
