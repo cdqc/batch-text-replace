@@ -108,10 +108,12 @@ btn_diff._diffTables_gen = () => {
   if (!btn_diff._diffTables_src) return
   if (btn_diff._diffTables) return btn_diff._diffTables
   btn_diff._diffTables = Object.values(btn_diff._diffTables_src).flat().sort(([, i1, mk1], [, i2]) => i1 - i2 !== 0 ? i1 - i2 : mk1 === "become")
-  btn_diff._diffTables.forEach(([str_i, , mk, hasMod], i, arr) => {
-    if (mk !== "replaced" || hasMod) return arr[i].splice(0, Infinity, str_i, "", mk)
+  const arr = btn_diff._diffTables
+  for (let i = 0, sArr; i < arr.length; ++i) {
+    const [str_i, , mk, hasMod] = sArr = arr[i]
+    if (mk !== "replaced" || hasMod) { arr[i].splice(0, Infinity, str_i, "", mk); continue }
     mergeExactSubsetStrings([arr[i], arr[i + 1]].map(([str]) => str), arr, i)
-  })
+  }
   function mergeExactSubsetStrings([str1, str2, isReversed], arr, i) {
     if (str1.length > str2.length) return mergeExactSubsetStrings([str2, str1, "(reversed)"], ...Array.prototype.slice.call(arguments, 1))
     if (!str2.includes(str1)) return
@@ -167,7 +169,7 @@ btn_rplc.addEventListener("click", () => {
   rplcArr_flat.forEach(sim => ctgy[sim[2]].push(sim))
   const rplcResultSegs = ctgy.unchanged.concat(ctgy.become).sort(([, i1], [, i2]) => i1 - i2)
   const rplcResultText = rplcResultSegs.map(([segStr]) => segStr).join("")
-  // console.log(JSON.stringify(ctgy, null, 2))
+  // console.log($str(ctgy))
   if (_oldVal === rplcResultText)
     tell(count ? "Replaced but no change happened." : "No matches found")
   else {
@@ -183,8 +185,8 @@ btn_cut.addEventListener("click", async () => {
   await navigator.clipboard.writeText(textarea.value)
   textarea.value = ""
 })
-btn_rem.addEventListener("click", () => textarea.value && (btn_rem._remed = textarea.value))
-btn_rec.addEventListener("click", () => btn_rem._remed && (textarea.value = btn_rem._remed))
+btn_rem.addEventListener("click", () => textarea.value && localStorage.setItem("btn_rem._remed", btn_rem._remed = textarea.value))
+btn_rec.addEventListener("click", () => (btn_rem._remed = btn_rem._remed || localStorage.getItem("btn_rem._remed")) && (textarea.value = btn_rem._remed) && set__mdc_floating_label_to_above(textarea))
 btn_toggleAll._states = ["check_box_outline_blank", "indeterminate_check_box", "check_box"]
 btn_toggleAll.addEventListener("click", () => {
   const [n, m, y] = btn_toggleAll._states
@@ -484,6 +486,8 @@ function isObjReg(obj) { return Object.prototype.toString.call(obj) == "[object 
 function tryEval(str) { try { return eval(str) } catch (_) { return false } }
 const metaChars = RegExp("[$()*+.?[\\]^{|}]", "g")
 function escChars(str) { return str.replace(metaChars, "\\$&") }
+
+function $str(str) { return JSON.stringify(str, null, 2) }
 
 
 // -----------------------------------------------------------------------------
