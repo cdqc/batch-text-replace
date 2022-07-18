@@ -503,6 +503,6 @@ addEventListener("hashchange", backedupRules.import);
 // -----------------------------------------------------------------------------
 
 (window.MathJaxStartup = () => window.MathJax && MathJax.startup
-  ? MathJax.startup.__domReady()
-  : setTimeout(window.MathJaxStartup, 500)
+  ? (MathJax.startup.__domReady(), delete window.MathJaxStartup)
+  : setTimeout(window.MathJaxStartup, 250)
 )()
