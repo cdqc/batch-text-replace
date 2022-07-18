@@ -33,6 +33,8 @@ const {
   });
 
 [mdc_text_field__list, mdc_tooltip__list, mdc_menu__list].forEach(assocDOMJS)
+assoc_MDC_inst_with_tmpl(mdc_checkbox__list, { tmplId: "mdc-checkbox" })
+assoc_MDC_inst_with_tmpl(ruleList, { tmplId: "mdc-text-field--filled", class: MDCTextField, selector: "label" })
 
 
 const the3label = [...the3.querySelectorAll("#the3>label")]
@@ -56,7 +58,7 @@ resizeWithTextarea()
 new ResizeObserver(resizeWithTextarea).observe(textarea)
 
 
-assoc_MDC_inst_with_tmpl(ruleList, { tmplId: "mdc-text-field--filled", class: MDCTextField, selector: "label" })
+
 ruleList.exec = fn => each(btn_frzSel._filterNotFrz(checkboxes()), fn)
 ruleList.addEventListener("click", ({ target }) => {
   target.matches($checkbox$) && btn_toggleAll._detectBoxesStat()
@@ -81,10 +83,8 @@ btn_diff._close = e => {
   const { wasViewing } = btn_diff._ctrl({ detail: { inst: true } })
   if (e && wasViewing) e.stopImmediatePropagation()
 }
-[btn_rplc, btn_undo, btn_cut, btn_menu].forEach(el => el.addEventListener("click", btn_diff._close))
-
 btn_undo.addEventListener("click", () => {
-  if (!textarea._oldVal) return
+  if (textarea._oldVal === undefined) return
   textarea.value = textarea._oldVal
   textarea.textareaHandler()
 })
@@ -135,8 +135,9 @@ btn_rplc.addEventListener("click", () => {
   const textArr = [[_oldVal, 0, "unchanged"]]
   let count = 0, text, value, index_c/*current*/, index_a/*anchor*/, index_n/*next*/
   const rplcArr = []
-  const rules = getOneRulePairAsStrArr().filter(([$find, , checked]) => checked && $find)
-  if (!rules.length) return tell(ruleList.childElementCount ? "No rules are ticked" : "No search rules are filled")
+  let hasCheckedRule
+  const rules = getOneRulePairAsStrArr().filter(([$find, , checked]) => checked && (hasCheckedRule = true) && $find)
+  if (!rules.length) return tell(ruleList.childElementCount ? `No ${hasCheckedRule ? `<em>non-empty</em> ` : ""}rules are ticked` : "No search rules are filled")
   try {
     rules.forEach(([$find, $rplc], i) => {
       $find = $find.replace(/^\s*\/\*.*?\*\//, "")
@@ -146,7 +147,7 @@ btn_rplc.addEventListener("click", () => {
       else if (btn_bslEsc._on) $rplc = eval(`"${$rplc.replaceAll(`"`, `\\"`)}"`)
       // console.log($find, $rplc)
       rplcArr[i] = []
-      while ([text, index_a] = textArr.shift() || [], text) {
+      while ([text, index_a] = textArr.shift() || [], text !== undefined) {
         index_n = $find.lastIndex = 0
         const vm = text.matchAll($find)
         while ({ value } = vm.next(), value) {
@@ -171,7 +172,7 @@ btn_rplc.addEventListener("click", () => {
   const rplcResultText = rplcResultSegs.map(([segStr]) => segStr).join("")
   // console.log($str(ctgy))
   if (_oldVal === rplcResultText)
-    tell(count ? "Replaced but no change happened." : "No matches found")
+    tell(count ? "Replaced but no change happened" : "No matches found")
   else {
     btn_diff._diffTables_reset(ctgy)
     textarea._oldVal = textarea.value
@@ -181,12 +182,12 @@ btn_rplc.addEventListener("click", () => {
   }
 })
 btn_cut.addEventListener("click", async () => {
-  if (!textarea.value) return tell("No, the textbox is empty.")
+  if (!textarea.value) return tell("No, the textbox is empty")
   await navigator.clipboard.writeText(textarea.value)
   textarea.value = ""
 })
 btn_rem.addEventListener("click", () => textarea.value && localStorage.setItem("btn_rem._remed", btn_rem._remed = textarea.value))
-btn_rec.addEventListener("click", () => (btn_rem._remed = btn_rem._remed || localStorage.getItem("btn_rem._remed")) && (textarea.value = btn_rem._remed) && set__mdc_floating_label_to_above(textarea))
+btn_rec.addEventListener("click", () => (btn_rem._remed = btn_rem._remed || localStorage.getItem("btn_rem._remed")) && (textarea.value = btn_rem._remed))
 btn_toggleAll._states = ["check_box_outline_blank", "indeterminate_check_box", "check_box"]
 btn_toggleAll.addEventListener("click", () => {
   const [n, m, y] = btn_toggleAll._states
@@ -205,7 +206,6 @@ btn_toggleAll._detectBoxesStat = direct => {
   const [n, m, y] = btn_toggleAll._states
   boxesStat.innerText = coll[true] ? coll[false] ? m : y : n
 }
-setTimeout(() => [btn_invSel, btn_addRule, btn_delRules, btn_selBtwn].forEach(_ => _.addEventListener("click", btn_toggleAll._detectBoxesStat)))
 btn_invSel.addEventListener("click", () => {
   btn_frzSel._filterNotFrz(checkboxes()).forEach(el => el.checked = !el.checked)
 })
@@ -240,7 +240,7 @@ btn_delRules.addEventListener("click", () => {
   let count = 0
   ruleList.exec(el => el.checked && ++count && el.closest("[rule-pair]").remove())
   if (!count) return
-  tell(`Deleted ${count} rules.`, tell.timeout_max, function Undo() { ruleList.append(...children); btn_toggleAll._detectBoxesStat() })
+  tell(`Deleted ${count} rules`, tell.timeout_max, function Undo() { ruleList.append(...children); btn_toggleAll._detectBoxesStat() })
 })
 function mvSel() {
   const [sib, dir] = mvSel.dict[this.id]
@@ -331,7 +331,7 @@ importRules.feed = srcText => {
   try {
     const evaledImportRules = eval(srcText)
     if (!Array.isArray(evaledImportRules) || !Array.isArray(evaledImportRules[0])) {
-      tell("Please enter a 2D array (in JS).")
+      tell("Please enter a 2D array (in JS)")
       return
     }
     const flushed = Array.from(new Set(convertToLinenArr(evaledImportRules).concat(exportRules.reap() || [])))
@@ -357,9 +357,8 @@ importRules.feed = srcText => {
 }
 exportRules.addEventListener("pointerdown", () => {
   const rules = exportRules.reap("")
-  if (!rules) return tell("Oh no, you never entered any rules.")
+  if (!rules) return tell("Oh no, you never entered any rules")
   textarea.value = rules
-  set__mdc_floating_label_to_above(textarea)
 })
 exportRules.reap = (retType = "partialArray") => {
   let rules = getOneRulePairAsStrArr()
@@ -370,7 +369,10 @@ exportRules.reap = (retType = "partialArray") => {
 }
 
 
-assoc_MDC_inst_with_tmpl(mdc_checkbox__list, { tmplId: "mdc-checkbox" })
+[btn_rplc, btn_undo, btn_cut, btn_menu].forEach(_ => _.addEventListener("click", btn_diff._close));
+[btn_rplc, btn_undo, btn_rec, exportRules].forEach(_ => _.addEventListener("click", () => textarea.value && set__mdc_floating_label_to_above(textarea)));
+[btn_invSel, btn_addRule, btn_delRules, btn_selBtwn].forEach(_ => _.addEventListener("click", btn_toggleAll._detectBoxesStat))
+
 
 
 // -----------------------------------------------------------------------------
@@ -461,7 +463,7 @@ function assoc_MDC_inst_with_tmpl(arbitraryObj, { tmplId = "", class: Class, sel
     placeholderEl.innerHTML = this._tmpl
   }
   arbitraryObj.insertTmpl = function () {
-    if (!(this instanceof HTMLElement)) throw TypeError("Only valid if `this` is an HTML element.")
+    if (!(this instanceof HTMLElement)) throw TypeError("Only valid if `this` is an HTML element")
     this.insertAdjacentHTML(btn_addRule._tmpSetToped ? "afterbegin" : "beforeend", this._tmpl)
     const el = this[`${btn_addRule._tmpSetToped ? "first" : "last"}ElementChild`]
     if (Class) {
