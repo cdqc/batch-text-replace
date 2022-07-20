@@ -26,16 +26,19 @@ textarea,
   caret-color: aliceblue;
   font-size: 1.25rem;
   line-height: 1.5rem;
+  /* Special adaptation to full-width characters: */
+  letter-spacing: calc(1ch / 9);
 }
 
 textarea.nowrap,
+textarea[data-css-inst="nowrap"].mdc-text-field__input,
 .mdc-text-field__input.nowrap {
   white-space: pre;
   overflow-wrap: normal;
   overflow-x: scroll;
 }
 
-textarea[data-css="don't squoosh spaces; break words"] {
+textarea[data-css-inst="don't squoosh spaces; break words"] {
   white-space: break-spaces;
   word-break: break-all;
 }
@@ -158,6 +161,7 @@ flex-sub:last-child {
   padding: 1rem;
   box-sizing: border-box;
   margin: 0;
+  resize: both;
 }
 
 #ruleList {

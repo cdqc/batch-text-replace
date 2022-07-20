@@ -41,6 +41,9 @@ const the3label = [...the3.querySelectorAll("#the3>label")]
 const the3textarea = the3label.map(_ => _.querySelector("textarea"))
 const the4textarea = [textarea, ...the3textarea]
 const $checkbox$ = "input[type=checkbox]"
+const $input$ = "input[type=text]"
+const $input$find = "input[type=text]:first-of-type"
+Object.defineProperty(ruleList, "_children", { get() { return Array.prototype.slice.call(ruleList.children) } })
 
 
 function resizeWithTextarea() {
@@ -79,38 +82,49 @@ btns.addEventListener("pointerdown", ({ target, x, y }) => {
   }
   else if ([r - x, b - y].every(v => v > 128)) btns.style.removeProperty("max-height")
 })
+
 btn_diff._close = e => {
   const { wasViewing } = btn_diff._ctrl({ detail: { inst: true } })
   if (e && wasViewing) e.stopImmediatePropagation()
 }
+[btn_rplc, btn_undo, btn_cut, btn_menu].forEach(_ => _.addEventListener("click", btn_diff._close))
 btn_undo.addEventListener("click", () => {
   if (textarea._oldVal === undefined) return
   textarea.value = textarea._oldVal
   textarea.textareaHandler()
 })
-function toggleAttr(el, add, attr) { el[`${add ? "set" : "remove"}Attribute`](attr, "") }
 btn_diff.addEventListener("click", btn_diff._ctrl = ({ detail: { inst } = {} }) => {
   const viewing = !the3.hidden
   const closeView = inst || viewing
-  !closeView && ["unchanged", "replaced", "become"].forEach(id => document.getElementById(id).value = btn_diff._alloc(id));
-  // Then switch to:
+  let nowrapBeacon
+  if (!closeView) {
+    ["unchanged", "replaced", "become"].forEach(id => document.getElementById(id).value = btn_diff._alloc(id))
+    if (btn_diff._diffTables && CJKP.test(btn_diff._diffTables.map(([_]) => _).join(""))) nowrapBeacon = "nowrap"
+  }
   [textarea, the3].forEach((el, i) => el.hidden = !((i + closeView) % 2))
-  btn_diff.dataset.viewing = !closeView
-  btn_lineWrap._wrapAll()
+  const toView = btn_diff.dataset.viewing = !closeView
+  if (toView) {
+    btn_lineWrap._was = btn_lineWrap._chosen || btn_lineWrap.dataset.state
+    btn_lineWrap._toggle({ cssInst: nowrapBeacon || "don't squoosh spaces; break words", invis: true })
+  }
+  else if (btn_lineWrap._was) {
+    btn_lineWrap._toggle({ state: btn_lineWrap._chosen || btn_lineWrap._was, invis: true })
+    delete btn_lineWrap._was
+  }
   return { wasViewing: viewing }
 })
 btn_diff._alloc = targetAreaId => {
   if (!btn_diff._diffTables_src) return ""
   if (!btn_diff._diffTables) btn_diff._diffTables_gen()
-  return btn_diff._diffTables.map(([str, mark]) => mark === targetAreaId ? str : str.replace(/\S/g, m => m === "␣" ? " " : " ".repeat(/[^\x00-\xff]/.test(m) ? 2 : 1))).join("")
+  return btn_diff._diffTables.map(([str, mark]) => mark === targetAreaId ? str : str.replace(/\S/g, m => m === "␣" ? " " : " ".repeat(CJKP.test(m) ? 2 : 1))).join("")
 }
 btn_diff._diffTables_gen = () => {
   if (!btn_diff._diffTables_src) return
   if (btn_diff._diffTables) return btn_diff._diffTables
   btn_diff._diffTables = Object.values(btn_diff._diffTables_src).flat().sort(([, i1, mk1], [, i2]) => i1 - i2 !== 0 ? i1 - i2 : mk1 === "become")
   const arr = btn_diff._diffTables
-  for (let i = 0, sArr; i < arr.length; ++i) {
-    const [str_i, , mk, hasMod] = sArr = arr[i]
+  for (let i = 0; i < arr.length; ++i) {
+    const [str_i, , mk, hasMod] = arr[i]
     if (mk !== "replaced" || hasMod) { arr[i].splice(0, Infinity, str_i, "", mk); continue }
     mergeExactSubsetStrings([arr[i], arr[i + 1]].map(([str]) => str), arr, i)
   }
@@ -136,11 +150,12 @@ btn_rplc.addEventListener("click", () => {
   let count = 0, text, value, index_c/*current*/, index_a/*anchor*/, index_n/*next*/
   const rplcArr = []
   let hasCheckedRule
-  const rules = getOneRulePairAsStrArr().filter(([$find, , checked]) => checked && (hasCheckedRule = true) && $find)
+  const checkNonNullnessFor$find = $find => $find.replace(/^\s*\/\*.*?\*\//, "")
+  const rules = getOneRulePairAsStrArr().filter(([$find, , checked], i, arr) => checked && (hasCheckedRule = true) && ([arr[i]] = checkNonNullnessFor$find($find)))
   if (!rules.length) return tell(ruleList.childElementCount ? `No ${hasCheckedRule ? `<em>non-empty</em> ` : ""}rules are ticked` : "No search rules are filled")
+  window.$i = 0
   try {
     rules.forEach(([$find, $rplc], i) => {
-      $find = $find.replace(/^\s*\/\*.*?\*\//, "")
       if (!$find) return
       $find = isStrReg($find) ? eval(/\/\w*g\w*$/.test($find) ? $find : `${$find}g`) : RegExp(escChars(btn_bslEsc._on ? $find : dblBsl($find)), "g")
       if ($rplc.includes("=>")) $rplc = eval($rplc)
@@ -236,7 +251,7 @@ btn_addRule.addEventListener("click", () => {
   insertAnEmptyRulePair().querySelector($checkbox$).checked = true
 })
 btn_delRules.addEventListener("click", () => {
-  const children = Array.prototype.slice.call(ruleList.children)
+  const children = ruleList._children
   let count = 0
   ruleList.exec(el => el.checked && ++count && el.closest("[rule-pair]").remove())
   if (!count) return
@@ -275,27 +290,25 @@ btn_frzSel.__toggle = elems => {
 btn_frzSel._toggle = wasFrz => btn_frzSel.__toggle(btn_frzSel[`_filter${wasFrz ? "" : "Not"}Frz`](checkboxes.checked()))
 btn_frzSel.addEventListener("click", () => btn_frzSel._toggle())
 btn_unfrzSel.addEventListener("click", () => btn_frzSel._toggle(true))
-const toggleState = (el, tipEl, { foundation }) => {
-  toggleState._next = el.dataset.state === "on" ? "off" : "on";
-  [el, tipEl].forEach(_ => _.dataset.state = toggleState._next)
-  !tipEl._invis && setTimeout(() => foundation.show())
-  return toggleState._next === "on"
+btn_sort.addEventListener("click", () => ruleList.append(...ruleList._children.sort((a, b) => ([a, b] = [a, b].map(getRule$find), a.localeCompare(b)))))
+btn_lineWrap._toggle = ({ state, cssInst = "" } = {}) => {
+  if (!cssInst) {
+    const { state: currState, on } = toggleState(btn_lineWrap, btn_lineWrap_tip, btn_lineWrap_tip_J, state)
+    btn_lineWrap._chosen = currState
+    the4textarea.forEach(_ => {
+      _.classList[!on ? "add" : "remove"]("nowrap")
+      !btn_diff.dataset.viewing === "true" && delete _.dataset.cssInst
+    })
+  }
+  else {
+    toggleState(btn_lineWrap, toggleState.tmpInvis(btn_lineWrap_tip), btn_lineWrap_tip_J, cssInst === "nowrap" ? "off" : btn_lineWrap._chosen || "on")
+    the4textarea.forEach(_ => _.dataset.cssInst = cssInst)
+  }
 }
-toggleState.tmpInvis = tipEl => {
-  tipEl._invis = true
-  setTimeout(() => delete tipEl._invis, 200)
-}
-btn_lineWrap._wrapAll = () => {
-  the4textarea.forEach(_ => _.dataset.css = btn_diff.dataset.viewing === "true" && !btn_lineWrap._off ? "don't squoosh spaces; break words" : "")
-}
-btn_lineWrap.addEventListener("click", () => {
-  btn_lineWrap._off = !toggleState(btn_lineWrap, btn_lineWrap_tip, btn_lineWrap_tip_J)
-  the4textarea.forEach(_ => _.classList[btn_lineWrap._off ? "add" : "remove"]("nowrap"))
-  btn_lineWrap._wrapAll()
-})
+btn_lineWrap.addEventListener("click", () => btn_lineWrap._toggle())
 btn_bslEsc._on = true
 btn_bslEsc.addEventListener("click", () => {
-  btn_bslEsc._on = toggleState(btn_bslEsc, btn_bslEsc_tip, btn_bslEsc_tip_J)
+  btn_bslEsc._on = toggleState(btn_bslEsc, btn_bslEsc_tip, btn_bslEsc_tip_J).on
 })
 btn_menu._h__preInputFromTest = "48px"
 btn_menu.addEventListener("click", () => {
@@ -369,8 +382,7 @@ exportRules.reap = (retType = "partialArray") => {
 }
 
 
-[btn_rplc, btn_undo, btn_cut, btn_menu].forEach(_ => _.addEventListener("click", btn_diff._close));
-[btns_edit, exportRules].forEach(_ => _.addEventListener("click", () => /* Don't: textarea.value && */ set__mdc_floating_label_to_above(textarea)));
+[...btns_edit.querySelectorAll("button"), exportRules].forEach(_ => _.addEventListener("click", () => /* Don't: textarea.value && */ set__mdc_floating_label_to_above(textarea)));
 [btn_invSel, btn_addRule, btn_delRules, btn_selBtwn].forEach(_ => _.addEventListener("click", btn_toggleAll._detectBoxesStat))
 
 
@@ -422,7 +434,10 @@ function insertAnEmptyRulePair() {
 }
 
 function getOneRulePairAsElemArr(el) {
-  return Array.from(el.querySelectorAll("input[type=text]")).concat(el.querySelector($checkbox$))
+  return Array.from(el.querySelectorAll($input$)).concat(el.querySelector($checkbox$))
+}
+function getRule$find(rulePair) {
+  return rulePair.querySelector($input$find).value
 }
 
 snackbar.surface_div = snackbar.querySelector(".mdc-snackbar__surface")
@@ -474,6 +489,17 @@ function assoc_MDC_inst_with_tmpl(arbitraryObj, { tmplId = "", class: Class, sel
   }
 }
 
+function toggleAttr(el, add, attr) { el[`${add ? "set" : "remove"}Attribute`](attr, "") }
+
+function toggleState(el, tipEl, { foundation }, state) {
+  state = state || (el.dataset.state === "on" ? "off" : "on");
+  [el, tipEl].forEach(_ => _.dataset.state = state)
+  !tipEl._invis && setTimeout(() => foundation.show())
+  return { state, on: state === "on" }
+}
+toggleState.tmpInvis = tipEl => (tipEl._invis = true, setTimeout(() => delete tipEl._invis, 50), tipEl)
+toggleState.noop = noop
+
 
 // -----------------------------------------------------------------------------
 
@@ -491,15 +517,18 @@ function escChars(str) { return str.replace(metaChars, "\\$&") }
 
 function $str(str) { return JSON.stringify(str, null, 2) }
 
+const CJKP = /[\p{sc=Han}。，；？、！：（）﹃﹄「」﹁﹂『』　［］〔〕【】－～．《》〈〉﹏＿]/gu
+
+function noop(arg) { return arg }
+
 
 // -----------------------------------------------------------------------------
 
-const backedupRules = () => `backedupRules${location.hash}`
+const backedupRules = () => `backedupRules${location.search.toLowerCase().replace("?", "workspace:")}`
 backedupRules.import = () => importRules.feed(localStorage.getItem(backedupRules()))
 backedupRules.export = () => localStorage.setItem(backedupRules(), exportRules.reap(""))
 backedupRules.import()
-addEventListener("beforeunload", backedupRules.export)
-addEventListener("hashchange", backedupRules.import);
+addEventListener("beforeunload", backedupRules.export);
 
 
 // -----------------------------------------------------------------------------

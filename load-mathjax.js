@@ -32,6 +32,15 @@ document.head.appendChild(
   }
   MathJax.startup.__domReady = (handlerName = textareaHandler.name) => {
     (textarea[handlerName] = textareaHandler)()
-    textarea.addEventListener("input", textareaHandler)
+    textarea.addEventListener("input", throttle(textareaHandler))
   }
 })
+
+function throttle(cb, limit = 500) {
+  let pre = 0, now
+  return function () {
+    if ((now = Date.now()) - pre < limit) return
+    cb.apply(this, arguments)
+    pre = now
+  }
+}
