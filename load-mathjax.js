@@ -36,11 +36,20 @@ document.head.appendChild(
   }
 })
 
-function throttle(cb, limit = 500) {
-  let pre = 0, now
+
+// -----------------------------------------------------------------------------
+
+function throttle(func, timeFrame = 500) {
+  let lastTime = 0, now, calling, tId, _this, _arguments
+
+  function call() { func.apply(_this, _arguments) }
+  function delayedTrailingCall() { clearTimeout(tId); tId = setTimeout(call, timeFrame) }
+
   return function () {
-    if ((now = Date.now()) - pre < limit) return
-    cb.apply(this, arguments)
-    pre = now
+    [_this, _arguments] = [this, arguments]
+
+    calling || (now = Date.now()) - lastTime < timeFrame
+      ? delayedTrailingCall()
+      : (calling = true, call(), lastTime = now, calling = false)
   }
 }

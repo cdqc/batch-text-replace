@@ -104,11 +104,11 @@ btn_diff.addEventListener("click", btn_diff._ctrl = ({ detail: { inst } = {} }) 
   [textarea, the3].forEach((el, i) => el.hidden = !((i + closeView) % 2))
   const toView = btn_diff.dataset.viewing = !closeView
   if (toView) {
-    btn_lineWrap._was = btn_lineWrap._chosen || btn_lineWrap.dataset.state
+    btn_lineWrap._was = btn_lineWrap._uPref || btn_lineWrap.dataset.state
     btn_lineWrap._toggle({ cssInst: nowrapBeacon || "don't squoosh spaces; break words", invis: true })
   }
   else if (btn_lineWrap._was) {
-    btn_lineWrap._toggle({ state: btn_lineWrap._chosen || btn_lineWrap._was, invis: true })
+    btn_lineWrap._toggle({ state: btn_lineWrap._uPref || btn_lineWrap._was, invis: true })
     delete btn_lineWrap._was
   }
   return { wasViewing: viewing }
@@ -294,14 +294,14 @@ btn_sort.addEventListener("click", () => ruleList.append(...ruleList._children.s
 btn_lineWrap._toggle = ({ state, cssInst = "" } = {}) => {
   if (!cssInst) {
     const { state: currState, on } = toggleState(btn_lineWrap, btn_lineWrap_tip, btn_lineWrap_tip_J, state)
-    btn_lineWrap._chosen = currState
+    btn_lineWrap._uPref = currState
     the4textarea.forEach(_ => {
       _.classList[!on ? "add" : "remove"]("nowrap")
       !btn_diff.dataset.viewing === "true" && delete _.dataset.cssInst
     })
   }
   else {
-    toggleState(btn_lineWrap, toggleState.tmpInvis(btn_lineWrap_tip), btn_lineWrap_tip_J, cssInst === "nowrap" ? "off" : btn_lineWrap._chosen || "on")
+    toggleState(btn_lineWrap, toggleState.tmpInvis(btn_lineWrap_tip), btn_lineWrap_tip_J, cssInst === "nowrap" ? "off" : btn_lineWrap._uPref || "on")
     the4textarea.forEach(_ => _.dataset.cssInst = cssInst)
   }
 }
@@ -498,7 +498,6 @@ function toggleState(el, tipEl, { foundation }, state) {
   return { state, on: state === "on" }
 }
 toggleState.tmpInvis = tipEl => (tipEl._invis = true, setTimeout(() => delete tipEl._invis, 50), tipEl)
-toggleState.noop = noop
 
 
 // -----------------------------------------------------------------------------
@@ -519,12 +518,10 @@ function $str(str) { return JSON.stringify(str, null, 2) }
 
 const CJKP = /[\p{sc=Han}。，；？、！：（）﹃﹄「」﹁﹂『』　［］〔〕【】－～．《》〈〉﹏＿]/gu
 
-function noop(arg) { return arg }
-
 
 // -----------------------------------------------------------------------------
 
-const backedupRules = () => `backedupRules${location.search.toLowerCase().replace("?", "workspace:")}`
+const backedupRules = () => `backedupRules:${new URLSearchParams(location.search).get(["workspace", "ws"].find(_ => location.search.includes(`${_}=`))) || "default_workspace"}`
 backedupRules.import = () => importRules.feed(localStorage.getItem(backedupRules()))
 backedupRules.export = () => localStorage.setItem(backedupRules(), exportRules.reap(""))
 backedupRules.import()
